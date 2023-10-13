@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+
+    redis:
+        image: redis:alpine
+        container_name: weatherapp_redis
+        networks:
+            - proxy
+
+    php:
+        #image: php:7.4
+        build: ./php
+        container_name: weatherapp
+        working_dir: /var/www/html
+        networks:
+            - proxy
+        dns: 172.101.10.250
+        environment:
+            - VIRTUAL_HOST=weatherapp.divo
+        external_links:
+            - "divo-mysql:mysql"
+        volumes:
+          - ../:/var/www/html
+          - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+          - ./server/demo.conf:/etc/apache2/sites-available/000-default.conf
+          - ./server/rewrite.load:/etc/apache2/mods-enabled/rewrite.load
+          - ./php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+
+networks:
+  proxy:
+    external:
+      name: global_proxy
